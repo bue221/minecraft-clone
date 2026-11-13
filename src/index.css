@@ -29,9 +29,22 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(50%, 50%);
+  transform: translate(-50%, -50%);
   text-shadow: 0 0 1px black;
   opacity: 0.7;
+  pointer-events: none;
+}
+
+.hud {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  padding: 6px 10px;
+  color: white;
+  font-family: monospace;
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: none;
 }
 
 .container-selector {

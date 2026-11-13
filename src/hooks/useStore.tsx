@@ -1,29 +1,51 @@
 import { nanoid } from "nanoid";
 import create from "zustand";
+import type { TextureName } from "../images/textures";
+import { Cube, positionKey, toGridPosition } from "../world/cube";
+import { loadCubes, saveCubes } from "../world/worldStorage";
 
-export const useStore = create((set) => ({
+interface WorldState {
+  texture: TextureName;
+  cubes: Cube[];
+  addCube: (x: number, y: number, z: number) => void;
+  removeCube: (id: string) => void;
+  setTexture: (texture: TextureName) => void;
+  resetWorld: () => void;
+}
+
+export const useStore = create<WorldState>()((set) => ({
   texture: "wood",
-  cubes: [],
-  addCube: (x: number, y: number, z: number) => {
-    set((state: any) => ({
-      cubes: [
-        ...state.cubes,
-        {
-          id: nanoid(),
-          pos: [x, y, z],
-          texture: state.texture,
-        },
-      ],
+  cubes: loadCubes(),
+  addCube: (x, y, z) => {
+    const pos = toGridPosition(x, y, z);
+    if (!pos) {
+      console.warn("[world] Ignoring cube with invalid position", { x, y, z });
+      return;
+    }
+
+    set((state) => {
+      const key = positionKey(pos);
+      if (state.cubes.some((cube) => positionKey(cube.pos) === key)) {
+        return state;
+      }
+      return {
+        cubes: [...state.cubes, { id: nanoid(), pos, texture: state.texture }],
+      };
+    });
+  },
+  removeCube: (id) => {
+    set((state) => ({
+      cubes: state.cubes.filter((cube) => cube.id !== id),
     }));
   },
-  removeCube: (id: any) => {
-    set((state: any) => ({
-      cubes: state.cubes.filter((cube: any) => cube.id !== id),
-    }));
+  setTexture: (texture) => {
+    set({ texture });
   },
-  setTexture: (texture: string) => {
-    set(() => ({ texture }));
+  resetWorld: () => {
+    set({ cubes: [] });
   },
-  saveWorld: () => {},
-  resetWorld: () => {},
 }));
+
+useStore.subscribe((state, previousState) => {
+  if (state.cubes !== previousState.cubes) saveCubes(state.cubes);
+});

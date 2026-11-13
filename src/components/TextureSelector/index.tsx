@@ -1,56 +1,38 @@
-import React, { useEffect, useState } from "react";
-//
+import { useEffect, useState } from "react";
 import { useKeyboard } from "../../hooks/useKeyboard";
 import { useStore } from "../../hooks/useStore";
-import * as images from "../../images/images";
+import { blockImages, TEXTURE_NAMES } from "../../images/textures";
+
+const VISIBLE_MS = 1000;
 
 const TexturesSelector = () => {
-  // states
   const [visible, setVisible] = useState(true);
-  const [texture, setTexture] = useStore((state: any) => [
-    state?.texture,
-    state?.setTexture,
-  ]);
-  // select keys
-  const { dirt, log, wood, glass, grass } = useKeyboard();
+  const texture = useStore((state) => state.texture);
+  const setTexture = useStore((state) => state.setTexture);
+  const actions = useKeyboard();
 
-  // this useffect listen to change the texture
+  const pressedTexture = TEXTURE_NAMES.find((name) => actions[name]);
   useEffect(() => {
-    const options = { dirt, log, wood, glass, grass };
+    if (pressedTexture) setTexture(pressedTexture);
+  }, [pressedTexture, setTexture]);
 
-    const [selectedTexture]: any = Object.entries(options).find(
-      ([texture, isEnable]) => isEnable
-    ) ?? [texture, true];
-    if (selectedTexture) {
-      setTexture(selectedTexture);
-    }
-  }, [dirt, grass, log, wood, glass]);
-
-  // this useffect listen to show the images of textures
   useEffect(() => {
-    const visibilityTimeout = setTimeout(() => {
-      setVisible(false);
-    }, 1000);
-
     setVisible(true);
-
-    return () => {
-      clearTimeout(visibilityTimeout);
-    };
+    const visibilityTimeout = setTimeout(() => setVisible(false), VISIBLE_MS);
+    return () => clearTimeout(visibilityTimeout);
   }, [texture]);
 
-  // dont show nothing
   if (!visible) return null;
 
   return (
     <div className="container-selector">
-      {Object.entries(images).map(([textureName, textureSrc]: any) => (
+      {TEXTURE_NAMES.map((name) => (
         <img
-          className={texture === textureName.replace("Img", "") ? "select" : ""}
-          key={textureName}
-          src={textureSrc}
-          alt={textureName}
-          onClick={() => setTexture(textureName)}
+          className={texture === name ? "select" : ""}
+          key={name}
+          src={blockImages[name]}
+          alt={name}
+          onClick={() => setTexture(name)}
         />
       ))}
     </div>

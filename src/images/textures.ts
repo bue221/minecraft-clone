@@ -1,30 +1,40 @@
 import { grassImg, dirtImg, logImg, glassImg, woodImg } from "./images.js";
 
-import { NearestFilter, RepeatWrapping, TextureLoader } from "three";
+import {
+  NearestFilter,
+  RepeatWrapping,
+  Texture,
+  TextureLoader,
+} from "three";
 
-const grassTexture = new TextureLoader().load(grassImg);
-const dirtTexture = new TextureLoader().load(dirtImg);
-const logTexture = new TextureLoader().load(logImg);
-const glassTexture = new TextureLoader().load(glassImg);
-const woodTexture = new TextureLoader().load(woodImg);
+export const TEXTURE_NAMES = ["dirt", "grass", "glass", "wood", "log"] as const;
+export type TextureName = (typeof TEXTURE_NAMES)[number];
 
-const groundTexture = new TextureLoader().load(grassImg);
+export const isTextureName = (value: unknown): value is TextureName =>
+  TEXTURE_NAMES.includes(value as TextureName);
 
+export const blockImages: Record<TextureName, string> = {
+  dirt: dirtImg,
+  grass: grassImg,
+  glass: glassImg,
+  wood: woodImg,
+  log: logImg,
+};
+
+const loader = new TextureLoader();
+
+const loadPixelTexture = (src: string): Texture => {
+  const texture = loader.load(src, undefined, undefined, (error) => {
+    console.error(`[textures] Failed to load texture "${src}"`, error);
+  });
+  texture.magFilter = NearestFilter;
+  return texture;
+};
+
+export const blockTextures = Object.fromEntries(
+  TEXTURE_NAMES.map((name) => [name, loadPixelTexture(blockImages[name])])
+) as Record<TextureName, Texture>;
+
+export const groundTexture = loadPixelTexture(grassImg);
 groundTexture.wrapS = RepeatWrapping;
 groundTexture.wrapT = RepeatWrapping;
-
-groundTexture.magFilter = NearestFilter;
-grassTexture.magFilter = NearestFilter;
-dirtTexture.magFilter = NearestFilter;
-logTexture.magFilter = NearestFilter;
-glassTexture.magFilter = NearestFilter;
-woodTexture.magFilter = NearestFilter;
-
-export {
-  groundTexture,
-  grassTexture,
-  dirtTexture,
-  logTexture,
-  glassTexture,
-  woodTexture,
-};
