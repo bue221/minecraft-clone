@@ -13,6 +13,14 @@ export type TextureName = (typeof TEXTURE_NAMES)[number];
 export const isTextureName = (value: unknown): value is TextureName =>
   TEXTURE_NAMES.includes(value as TextureName);
 
+export const blockLabels: Record<TextureName, string> = {
+  dirt: "Tierra",
+  grass: "Césped",
+  glass: "Vidrio",
+  wood: "Madera",
+  log: "Tronco",
+};
+
 export const blockImages: Record<TextureName, string> = {
   dirt: dirtImg,
   grass: grassImg,

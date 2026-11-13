@@ -1,4 +1,6 @@
 import { useStore } from "../../hooks/useStore";
+import { isTexturedBlock } from "../../inventory/items";
+import ChestBlock from "../ChestBlock";
 import Cube from "../Cube";
 
 const Cubes = () => {
@@ -6,9 +8,13 @@ const Cubes = () => {
 
   return (
     <>
-      {cubes.map(({ pos, id, texture }) => (
-        <Cube key={id} id={id} position={pos} texture={texture} />
-      ))}
+      {cubes.map(({ pos, id, type, facing = 0 }) =>
+        isTexturedBlock(type) ? (
+          <Cube key={id} id={id} position={pos} texture={type} />
+        ) : (
+          <ChestBlock key={id} id={id} position={pos} facing={facing} />
+        )
+      )}
     </>
   );
 };
